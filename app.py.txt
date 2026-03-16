@@ -1,0 +1,56 @@
+import streamlit as st
+
+# Streamlit UI Configuration
+st.set_page_config(page_title="AI Mock Interviewer", layout="centered")
+st.title("🤖 AI Mock Interviewer: Python Developer")
+
+
+
+questions = [
+    "What is the difference between a list and a tuple in Python?",
+    "Explain decorators in Python and give a real-world use case.",
+    "How does memory management work in Python (Garbage Collection)?",
+    "What are Python Generators and why are they useful for large data sets?",
+    "Explain the difference between a 'Shallow Copy' and a 'Deep Copy'.",
+    "How would you handle exceptions in a large production-level application?"
+]
+
+# Step 4: Streamlit Session State to track progress
+if 'current_q' not in st.session_state:
+    st.session_state.current_q = 0
+    st.session_state.feedback_history = []
+
+if st.session_state.current_q < len(questions):
+    current_question = questions[st.session_state.current_q]
+    
+    st.subheader(f"Question {st.session_state.current_q + 1}:")
+    st.write(current_question)
+    
+    user_answer = st.text_area("Your Answer:", key=f"ans_{st.session_state.current_q}")
+    
+    if st.button("Submit Answer"):
+        if user_answer:
+            # Step 3: Simple Logic for Feedback
+            if len(user_answer.split()) < 10:
+                feedback = "⚠️ Try to give more details about the concept."
+            elif "example" not in user_answer.lower():
+                feedback = "💡 That’s correct, but can you provide a practical example?"
+            else:
+                feedback = "✅ Good explanation! Very detailed."
+            
+            st.session_state.feedback_history.append({"q": current_question, "f": feedback})
+            st.session_state.current_q += 1
+            st.rerun()
+        else:
+            st.warning("Please type an answer before submitting.")
+
+else:
+    st.success("🎉 Interview Complete!")
+    st.subheader("Your Feedback Summary:")
+    for item in st.session_state.feedback_history:
+        st.write(f"**Q:** {item['q']}")
+        st.info(f"**Feedback:** {item['f']}")
+    if st.button("Restart Interview"):
+        st.session_state.current_q = 0
+        st.session_state.feedback_history = []
+        st.rerun()
